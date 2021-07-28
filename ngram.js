@@ -4,9 +4,10 @@ const count = require('n-gram-counter');
 let n = 2
 let min = 5
 let context = false;
-let contextMin = 3;
-let contextSize = 2;
+let contextMin = 1;
+let contextSize = 1;
 let nlimit = false;
+let verbs = false;
 
 function isPositiveNumber(num) {
   return num && num.match(/^[0-9]+$/) != null && (Number.parseInt(num) > 0);
@@ -45,6 +46,12 @@ function processArgs() {
         case 'context':
           if (pair[1] === 'true') context = true;
           else if (pair[1] === 'false') context = false;
+          else return false;
+          break;
+        
+        case 'verbs':
+          if (pair[1] === 'true') verbs = true;
+          else if (pair[1] === 'false') verbs = false;
           else return false;
           break;
 
@@ -112,9 +119,8 @@ function displayContextWords(words, array) {
   })
 };
 
-function transformAndFilter(bufferWordArray, bufferExcludedArray) {
-  var wordString = getCleanString(bufferWordArray.toString());
-  wordArray = wordString.split(' ');
+function transformAndFilter(bufferWordArray, bufferExcludedArray = []) {
+  var wordArray = getCleanString(bufferWordArray.toString()).split(' ');
   var excludedArray = getCleanString(bufferExcludedArray.toString()).split(' ');
   excludedArray.map(excludedWord => wordArray = removeItemAll(wordArray, excludedWord))
 
@@ -124,15 +130,17 @@ function transformAndFilter(bufferWordArray, bufferExcludedArray) {
 function run() {
   var bufferWordArray = fs.readFileSync('text.txt');
   var bufferExcludedArray = fs.readFileSync('excluded.txt');
-
   wordArray = transformAndFilter(bufferWordArray, bufferExcludedArray);
+
+  var bufferVerbsArray = fs.readFileSync('verbs.txt');
+  verbsArray = transformAndFilter(bufferVerbsArray);
   // For debug
   fs.writeFileSync('filteredlist.txt', wordArray.join(' '));
   let counts = count({ data: wordArray, n });
   if (nlimit) counts = counts.slice(0, nlimit);
 
   counts.map(ngram => {
-    if (ngram[1] > min) {
+    if (ngram[1] > min && (!verbs || verbsArray.indexOf(ngram[0][0]) > -1)) {
       console.log('\n' + n + '-gram found ' + ngram[1] + ' times: ' + ngram[0].join(' + '));
       if (context) displayContextWords(ngram[0], [...wordArray]);
       console.log('-'.repeat(52));
@@ -150,6 +158,7 @@ if (processArgs()) {
   console.log('Bad usage. Specify an option like this: <arg>=<value>. Available options:\n' +
   '- n (numeric): number of grams.\n' +
   '- min (numeric): minimal ngrams found to be displayed.\n' +
+  '- verbs (boolean): requires first word of the ngram to be a verb\n' +
   '- context (boolean): display close words\n' +
   '- contextsize (numeric): amount of context words displayed\n' +
   '- contextmin (numeric): minimal amount of same context words to be displayed.')
