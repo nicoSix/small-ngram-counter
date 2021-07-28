@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "fs": "0.0.1-security",
-    "n-gram-counter": "0.0.0"
+    "n-gram-counter": "0.0.0",
+    "wink-lemmatizer": "^3.0.2"
   }
 }

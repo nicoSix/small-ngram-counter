@@ -1,5 +1,6 @@
 const fs = require('fs');
 const count = require('n-gram-counter');
+var lemmatize = require( 'wink-lemmatizer' );
 
 let n = 2
 let min = 5
@@ -121,6 +122,9 @@ function displayContextWords(words, array) {
 
 function transformAndFilter(bufferWordArray, bufferExcludedArray = []) {
   var wordArray = getCleanString(bufferWordArray.toString()).split(' ');
+  wordArray.map(word => lemmatize.adjective(word));
+  wordArray.map(word => lemmatize.noun(word));
+  wordArray.map(word => lemmatize.verb(word));
   var excludedArray = getCleanString(bufferExcludedArray.toString()).split(' ');
   excludedArray.map(excludedWord => wordArray = removeItemAll(wordArray, excludedWord))
 
