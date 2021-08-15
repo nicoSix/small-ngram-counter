@@ -132,7 +132,7 @@ function transformAndFilter(bufferWordArray, bufferExcludedArray = []) {
 };
 
 function run() {
-  var bufferWordArray = fs.readFileSync('text.txt');
+  var bufferWordArray = fs.readFileSync('titles.txt');
   var bufferExcludedArray = fs.readFileSync('excluded.txt');
   wordArray = transformAndFilter(bufferWordArray, bufferExcludedArray);
 
